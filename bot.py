@@ -1,3 +1,5 @@
+from asyncio.windows_events import NULL
+from ctypes import sizeof
 import os
 import discord
 from discord.ext import commands
@@ -17,13 +19,32 @@ async def on_ready():
     print("ONLINE")
 
 @bot.command(name='start', help='help me', brief='Starts a live translating thread.')
-async def start(ctx):
-    embed=discord.Embed(title="Sample Embed", url="https://realdrewdata.medium.com/", description="This is an embed that will show how to build an embed and the different components", color=0xFF5733)
-    await ctx.send(embed=embed)
-    await ctx.message.create_thread(name="TRNASLATE")
+async def start(ctx, *args):
+    isValid = False
+    if len(args) == 3:
+        lang = args[0]
+        lang2 = args[1]
+        threadname = args[2]
+        isValid = True
+    elif len(args) == 2:
+        lang = args[0]
+        lang2 = args[1]
+        threadname = lang+" and "+lang2
+        isValid = True
+    else:
+        pass
+
+    if isValid is True:
+        await ctx.channel.send("BEEP BOOP THREAD CREATED")
+        await ctx.message.create_thread(name=threadname)
+
+        while not ctx.message.locked:
+            msg = await ctx.message.thread.wait_for('message')
+            translate(lang2, msg)
+        pass
     pass
 
-@bot.command()
+@bot.command(name='translate', help='Instantly translates any statement', brief='Translates any short excerpt you wish to translate from one language to another!')
 async def translate(ctx, lang, *args):
     translator = Translator()
     message = ' '.join(args)
