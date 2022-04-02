@@ -16,12 +16,14 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 async def on_ready():
     print("ONLINE")
 
-@bot.command(name='help')
-async def help(ctx):
-    pass
+#@bot.command(name='help')
+#async def help(ctx):
+#    pass
 
 @bot.command(name='start')
 async def start(ctx):
+    embed=discord.Embed(title="Sample Embed", url="https://realdrewdata.medium.com/", description="This is an embed that will show how to build an embed and the different components", color=0xFF5733)
+    await ctx.send(embed=embed)
     pass
 
 @bot.command(name='translate')
