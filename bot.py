@@ -44,7 +44,7 @@ async def translate(ctx, *args):
             message = bot.get_message(int(message)).content
     except ValueError as e:
         pass
-    translated =translator.translate(message, dest=lang).text
+    translated = translator.translate(message, dest=lang).text
     await ctx.channel.send(translated)
         
 
