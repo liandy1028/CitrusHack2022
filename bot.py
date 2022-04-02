@@ -1,8 +1,10 @@
 import os
 import discord
 from discord.ext import commands
+import googletrans
 from googletrans import Translator
 from dotenv import load_dotenv
+from languageSupport import specialLang
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -23,11 +25,27 @@ async def start(ctx):
     await ctx.message.create_thread(name="TRNASLATE")
     pass
 
-@bot.command()
-async def translate(ctx, lang, *args):
+@bot.command(aliases=['t','trans'])
+async def translate(ctx, *args):
     translator = Translator()
-    message = ' '.join(args)
+    if len(args) < 2:
+        await ctx.channel.send(f'Please provide a language to translate and the message you want to translate')
+        return
+    elif args[0] in googletrans.LANGUAGES or args[0] in googletrans.LANGCODES:
+        lang = args[0]
+    elif args[0] in specialLang:
+        lang = specialLang[args[0]]
+    else:
+        await ctx.channel.send(f'The language `{args[0]}` is not supported.')
+        return
+    message = ' '.join(args[1:])
+    try:
+        if bot.get_message(int(message)):
+            message = bot.get_message(int(message)).content
+    except ValueError as e:
+        pass
     translated =translator.translate(message, dest=lang).text
     await ctx.channel.send(translated)
+        
 
 bot.run(TOKEN)

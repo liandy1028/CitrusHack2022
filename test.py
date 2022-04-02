@@ -1,5 +1,4 @@
 from googletrans import Translator
+import googletrans
 
-translator = Translator()
-x = translator.translate('please acknowledge me', dest='hindi')
-print(x)
+print(int("hello"))
