@@ -20,16 +20,15 @@ async def on_ready():
 #async def help(ctx):
 #    pass
 
-@bot.command(name='start')
+@bot.command(name='start', help='help me', brief='Starts a live translating thread.')
 async def start(ctx):
     embed=discord.Embed(title="Sample Embed", url="https://realdrewdata.medium.com/", description="This is an embed that will show how to build an embed and the different components", color=0xFF5733)
     await ctx.send(embed=embed)
+    await ctx.message.create_thread("name", "Translation", auto_archive_duration=100)
     pass
 
 @bot.command(name='translate')
 async def translate(ctx):
     pass
-
-
 
 bot.run(TOKEN)
