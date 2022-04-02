@@ -16,11 +16,11 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 async def on_ready():
     print("ONLINE")
 
-@bot.command(name='help')
-async def help(ctx):
-    pass
+# @bot.command(name='help')
+# async def help(ctx):
+#     pass
 
-@bot.command(name='start')
+@bot.command(name='start', help='Usage: !start :flag_us::flag_cn:', brief='Starts a live translating thread.')
 async def start(ctx):
     pass
 
