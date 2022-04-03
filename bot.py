@@ -16,17 +16,30 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 intents = discord.Intents.all()
 intents.members = True
 
-bot = commands.Bot(command_prefix='!', intents=intents)
+bot = commands.Bot(command_prefix='!', intents=intents, help_command=None)
 
 @bot.event
 async def on_ready():
     await bot.change_presence(activity=discord.Game(name="!help"))
     print("ONLINE")
 
+@bot.command()
+async def help(ctx):
+    file = discord.File("Citranslate_1.0_Logo.png")
+    embed=discord.Embed(description='Welcome to the help menu!', color=0xe67e22)
+    embed.set_author(name=ctx.author.display_name, icon_url=ctx.author.avatar.url)
+    embed.set_thumbnail(url="attachment://Citranslate_1.0_Logo.png")
+    embed.add_field(name="Help", value="This is what you're looking at! !help", inline=False)
+    embed.add_field(name="Start", value="Creates a real-time translating thread! !start [lang1] [lang2] [threadname]", inline=False)
+    embed.add_field(name="Translate", value="Instantly translates anything to any language! !translate [lang] [anything]", inline=False)
+    embed.add_field(name="Quotes", value="Obtain wise proverbs from all around the world! !quotes", inline=False)
+    embed.set_footer(text="Changing the future. One text message at a time.")
+    await ctx.channel.send(file=file, embed=embed)
+
 async def embedMessage(ctx, msg):
-    embed=discord.Embed(title="Sample Embed", url="https://realdrewdata.medium.com/", description=msg, color=0xFF5733)
-    embed.set_author(name=ctx.author.display_name, url="https://twitter.com/RealDrewData", icon_url=ctx.author.avatar_url)
-    await ctx.send(embed=embed)
+    embed=discord.Embed(description=msg, color=0xe67e22)
+    embed.set_author(name=ctx.author.display_name, icon_url=ctx.author.avatar.url)
+    await ctx.channel.send(embed=embed)
 
 @bot.event
 async def on_message(message):
@@ -70,8 +83,8 @@ async def start(ctx, *args):
           
 @bot.command(
     aliases=['t','trans'], 
-    help='Translates any short excerpt you wish to translate from one language to another!', 
-    brief='Instantly translates any statement.'
+    #help='Translates any short excerpt you wish to translate from one language to another!', 
+    #brief='Instantly translates any statement.'
 )
 async def translate(ctx, *args):
     translator = Translator()
@@ -100,7 +113,6 @@ async def translate(ctx, *args):
     except ValueError:
         pass
     translated = translator.translate(message, dest=lang).text
-    #await ctx.channel.send(translated)
     await embedMessage(ctx, translated)
 
 @bot.command(
@@ -110,7 +122,8 @@ async def translate(ctx, *args):
     brief = 'Witness the glory and culture of 52 regions!'
 )
 async def quotes(ctx):
-    await ctx.channel.send(proverbs[str(randrange(52)+1)])
+    #await ctx.channel.send(proverbs[str(randrange(52)+1)])
+    await embedMessage(ctx, proverbs[str(randrange(52)+1)])
         
 def setLang(lang):
     lang = lang.lower()
@@ -140,7 +153,7 @@ async def translate_message(message):
     else:
         return
     translated = translator.translate(message.content, src=src, dest=dest).text
-    await message.channel.send(translated)
+    await embedMessage(message, translated)
 
 try:
     with open('threads.json', 'r') as f:
