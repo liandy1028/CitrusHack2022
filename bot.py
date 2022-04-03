@@ -88,7 +88,15 @@ async def translate(ctx, *args):
         if m := await ctx.fetch_message(int(message)):
             message = m.content
             if not message:
-                message = '. '.join([', '.join(f'{k} : {v}' for (k, v) in embed.to_dict().items()) for embed in m.embeds])
+                message = m.embeds[0].to_dict()['description']
+            if not message:
+                await ctx.channel.send('Unable to translate message: ')
+                try:
+                    await ctx.channel.send(m.content)
+                except discord.errors.HTTPException:
+                    pass
+                await ctx.channel.send(embed=m.embeds[0])
+                return
     except ValueError:
         pass
     translated = translator.translate(message, dest=lang).text
@@ -96,7 +104,7 @@ async def translate(ctx, *args):
     await embedMessage(ctx, translated)
 
 @bot.command(
-    aliases=['q'],
+    aliases=['q', 'quote'],
     name = 'quotes',
     help = 'Use this command to display a random quote, courtesy of https://thecultureur.com/around-the-world-in-52-proverbs/',
     brief = 'Witness the glory and culture of 52 regions!'
