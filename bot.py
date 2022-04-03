@@ -1,5 +1,4 @@
-from asyncio.windows_events import NULL
-from ctypes import sizeof
+from ast import alias
 import os
 import discord
 from discord.ext import commands
@@ -7,6 +6,8 @@ import googletrans
 from googletrans import Translator
 from dotenv import load_dotenv
 from languageSupport import specialLang
+from proverbs import proverbs
+from random import randrange
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -18,9 +19,15 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 
 @bot.event
 async def on_ready():
+    await bot.change_presence(activity=discord.Game(name="!help"))
     print("ONLINE")
 
-@bot.command(name='start', help='help me', brief='Starts a live translating thread.')
+@bot.command(
+    alias=['s'],
+    name='start', 
+    help='Creates a thread wherein the 2 languages are translated to each other!', 
+    brief='Starts a live translating thread.'
+)
 async def start(ctx, *args):
     isValid = False
     if len(args) == 3:
@@ -48,8 +55,8 @@ async def start(ctx, *args):
 
 @bot.command(
     aliases=['t','trans'], 
-    help='Instantly translates any statement', 
-    brief='Translates any short excerpt you wish to translate from one language to another!'
+    help='Translates any short excerpt you wish to translate from one language to another!', 
+    brief='Instantly translates any statement.'
 )
 async def translate(ctx, *args):
     translator = Translator()
@@ -71,6 +78,14 @@ async def translate(ctx, *args):
         pass
     translated =translator.translate(message, dest=lang).text
     await ctx.channel.send(translated)
-        
+
+@bot.command(
+    aliases=['q'],
+    name = 'quotes',
+    help = 'Use this command to display a random quote, courtesy of https://thecultureur.com/around-the-world-in-52-proverbs/',
+    brief = 'Witness the glory and culture of 52 regions!'
+)
+async def quotes(ctx):
+    await ctx.channel.send(proverbs[str(randrange(52)+1)])
 
 bot.run(TOKEN)
