@@ -23,6 +23,11 @@ async def on_ready():
     await bot.change_presence(activity=discord.Game(name="!help"))
     print("ONLINE")
 
+async def embedMessage(ctx, msg):
+    embed=discord.Embed(title="Sample Embed", url="https://realdrewdata.medium.com/", description=msg, color=0xFF5733)
+    embed.set_author(name=ctx.author.display_name, url="https://twitter.com/RealDrewData", icon_url=ctx.author.avatar_url)
+    await ctx.send(embed=embed)
+
 @bot.event
 async def on_message(message):
     if message.author == bot.user:
@@ -80,12 +85,13 @@ async def translate(ctx, *args):
         return
     message = ' '.join(args[1:])
     try:
-        if bot.get_message(int(message)):
-            message = bot.get_message(int(message)).content
+        if m := discord.abc.Messageable.fetch_message(int(message)):
+            message = m.content
     except ValueError:
         pass
     translated = translator.translate(message, dest=lang).text
-    await ctx.channel.send(translated)
+    #await ctx.channel.send(translated)
+    await embedMessage(ctx, translated)
 
 @bot.command(
     aliases=['q'],
