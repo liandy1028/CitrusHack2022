@@ -25,6 +25,10 @@ async def on_ready():
 
 @bot.event
 async def on_message(message):
+    if message.author == bot.user:
+        return
+    if message.channel.id in threads:
+        await translate_message(message)
     await bot.process_commands(message)
 
 @bot.command(
@@ -51,17 +55,13 @@ async def start(ctx, *args):
 
     if isValid is True:
         try:
-            thread = await ctx.message.create_thread(name=threadname)
+            thread = await ctx.message.create_thread(name=threadname, auto_archive_duration=60)
         except discord.errors.HTTPException:
             await ctx.channel.send('Unable to create thread')
             return
-        
-        with open('threads.json', 'r') as f:
-            threads = json.load(f)
+
         threads[thread.id] = [lang, lang2]
-        with open('threads.json', 'w') as f:
-            f.write(json.dumps(threads, indent=4))
-        # await bot.remove_threads()
+        remove_threads()
           
 @bot.command(
     aliases=['t','trans'], 
@@ -82,7 +82,7 @@ async def translate(ctx, *args):
     try:
         if bot.get_message(int(message)):
             message = bot.get_message(int(message)).content
-    except ValueError as e:
+    except ValueError:
         pass
     translated = translator.translate(message, dest=lang).text
     await ctx.channel.send(translated)
@@ -97,11 +97,40 @@ async def quotes(ctx):
     await ctx.channel.send(proverbs[str(randrange(52)+1)])
         
 def setLang(lang):
-    if lang in googletrans.LANGUAGES or lang in googletrans.LANGCODES:
+    lang = lang.lower()
+    if lang in googletrans.LANGUAGES:
+        return googletrans.LANGUAGES[lang]
+    elif lang in googletrans.LANGCODES:
         return lang
     elif lang in specialLang:
         return specialLang[lang]
     else:
         return None
 
-bot.run(TOKEN)
+def remove_threads():
+    for thread in list(threads):
+        if not bot.get_channel(thread):
+            del threads[thread]
+        elif bot.get_channel(thread).archived:
+            del threads[thread]
+
+async def translate_message(message):
+    translator = Translator()
+    src = googletrans.LANGUAGES[translator.detect(message.content).lang.lower()]
+    if src == threads[message.channel.id][0]:
+        dest = threads[message.channel.id][1]
+    elif src == threads[message.channel.id][1]:
+        dest = threads[message.channel.id][0]
+    else:
+        return
+    translated = translator.translate(message.content, src=src, dest=dest).text
+    await message.channel.send(translated)
+
+try:
+    with open('threads.json', 'r') as f:
+        threads = json.load(f)
+
+    bot.run(TOKEN)
+finally:
+    with open('threads.json', 'w') as f:
+        f.write(json.dumps(threads, indent=4))

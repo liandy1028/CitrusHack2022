@@ -1,4 +1,7 @@
+from hmac import trans_36
 from googletrans import Translator
 import googletrans
 
-print(int("hello"))
+t=Translator()
+
+print(googletrans.LANGUAGES)
