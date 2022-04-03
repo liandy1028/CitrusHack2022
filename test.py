@@ -5,3 +5,5 @@ import googletrans
 t=Translator()
 
 print(googletrans.LANGUAGES)
+
+print(t.translate("hello", dest='ps'))
