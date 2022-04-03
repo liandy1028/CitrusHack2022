@@ -98,8 +98,10 @@ async def translate(ctx, *args):
         return
     message = ' '.join(args[1:])
     try:
-        if m := discord.abc.Messageable.fetch_message(int(message)):
+        if m := await ctx.fetch_message(int(message)):
             message = m.content
+            if not message:
+                message = '. '.join([', '.join(f'{k} : {v}' for (k, v) in embed.to_dict().items()) for embed in m.embeds])
     except ValueError:
         pass
     translated = translator.translate(message, dest=lang).text
