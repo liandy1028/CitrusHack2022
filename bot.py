@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from languageSupport import specialLang
 from proverbs import proverbs
 from random import randrange
+import json
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -22,6 +23,10 @@ async def on_ready():
     await bot.change_presence(activity=discord.Game(name="!help"))
     print("ONLINE")
 
+@bot.event
+async def on_message(message):
+    await bot.process_commands(message)
+
 @bot.command(
     alias=['s'],
     name='start', 
@@ -29,30 +34,35 @@ async def on_ready():
     brief='Starts a live translating thread.'
 )
 async def start(ctx, *args):
-    isValid = False
-    if len(args) == 3:
-        lang = args[0]
-        lang2 = args[1]
-        threadname = args[2]
-        isValid = True
-    elif len(args) == 2:
-        lang = args[0]
-        lang2 = args[1]
-        threadname = lang+" and "+lang2
+    if len(args) >= 2:
+        if not (lang := setLang(args[0])):
+            await ctx.channel.send(f'The language `{args[0]}` is not supported.')
+            return
+        if not (lang2 := setLang(args[1])):
+            await ctx.channel.send(f'The language `{args[1]}` is not supported.')
+            return
+        if len(args) >= 3:
+            threadname = ' '.join(args[2:])
+        else:
+            threadname = f'{lang} and {lang2}'
         isValid = True
     else:
-        pass
+        isValid = False
 
     if isValid is True:
-        await ctx.channel.send("BEEP BOOP THREAD CREATED")
-        await ctx.message.create_thread(name=threadname)
-
-        while not ctx.message.locked:
-            msg = await ctx.message.thread.wait_for('message')
-            translate(lang2, msg)
-        pass
-    pass
-
+        try:
+            thread = await ctx.message.create_thread(name=threadname)
+        except discord.errors.HTTPException:
+            await ctx.channel.send('Unable to create thread')
+            return
+        
+        with open('threads.json', 'r') as f:
+            threads = json.load(f)
+        threads[thread.id] = [lang, lang2]
+        with open('threads.json', 'w') as f:
+            f.write(json.dumps(threads, indent=4))
+        # await bot.remove_threads()
+          
 @bot.command(
     aliases=['t','trans'], 
     help='Translates any short excerpt you wish to translate from one language to another!', 
@@ -63,10 +73,8 @@ async def translate(ctx, *args):
     if len(args) < 2:
         await ctx.channel.send(f'Please provide a language to translate and the message you want to translate')
         return
-    elif args[0] in googletrans.LANGUAGES or args[0] in googletrans.LANGCODES:
-        lang = args[0]
-    elif args[0] in specialLang:
-        lang = specialLang[args[0]]
+    elif lang := setLang(args[0]):
+        pass
     else:
         await ctx.channel.send(f'The language `{args[0]}` is not supported.')
         return
@@ -76,7 +84,7 @@ async def translate(ctx, *args):
             message = bot.get_message(int(message)).content
     except ValueError as e:
         pass
-    translated =translator.translate(message, dest=lang).text
+    translated = translator.translate(message, dest=lang).text
     await ctx.channel.send(translated)
 
 @bot.command(
@@ -87,5 +95,13 @@ async def translate(ctx, *args):
 )
 async def quotes(ctx):
     await ctx.channel.send(proverbs[str(randrange(52)+1)])
+        
+def setLang(lang):
+    if lang in googletrans.LANGUAGES or lang in googletrans.LANGCODES:
+        return lang
+    elif lang in specialLang:
+        return specialLang[lang]
+    else:
+        return None
 
 bot.run(TOKEN)
