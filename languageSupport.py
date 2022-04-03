@@ -1,5 +1,5 @@
 specialLang = {
-    'cn' : 'chinese (simplified)',
+    'zh' : 'chinese (simplified)',
     'chinese' : 'chinese (simplified)',
     # TODO add more languages
 }
