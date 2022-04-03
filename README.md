@@ -50,3 +50,6 @@ In order to test our project, all we mainly did was write a couple lines of code
 Because we only had 1 server to work on, we would take turns activating our version of the bot (since we were all adding different things to the bot) in order to test what works and what didn't before handing the bot over to our teammates (we shared the discord bot token).
 Testing the quotes, help, and translate functions were fairly easy as they involved looking at what the bot sent in the #general chat and cross-referencing it with what we expected it to output whereas testing the start function was slightly more complicated as it involved threads, something that is fairly new in Discord which meant that at times, we were scraping the bottom of the barrel trying to figure out what was going wrong.
 Overall, the testing went well and we were able to overcome all our obstacles and make a working bot.
+
+## Project Slides
+https://emailucr-my.sharepoint.com/:p:/g/personal/stephen_ng_email_ucr_edu/EThmCqz8Y3xJnU6RnJxg0VoBmH8E3oSEnjQ30IKbthkzsQ?e=exJAP3
